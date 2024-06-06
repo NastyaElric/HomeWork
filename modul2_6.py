@@ -1,12 +1,13 @@
 
 def single_root_words(root_world, *other_words):
     same_words = []
-    c = 0
     for word in other_words:
         if root_world in word or word in root_world:
+            root_world.upper()
+            root_world.lower()
+            word.upper()
+            word.lower()
             same_words.append(word)
-        if word.upper() == word.lower():
-            c = c + 1
 
     return same_words
 
