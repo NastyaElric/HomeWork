@@ -1,130 +1,97 @@
-class User:
-    def __init__(self, nickname, password, age):
-        self.nickname = nickname
-        self.password = password
-        self.age = age
-
-if __name__ == "__main__":
-    user = User(input("Enter your nickname: "), input("Enter your password: "), input("Enter your age: "))
-
-
-class Video:
-    def __init__(self, title, time_now, adult_mode):
-        self.title = title
-        self.time_now = time_now
-        # self.duration = duration
-        self.adult_mode = False
+from time import sleep
 
 
 class UrTube:
-    def __init__(self):
-        self.users = []
+    def init(self):
+        self.users = {}
         self.videos = []
         self.current_user = None
+
+    def log_in(self, login, password):
+        if login not in self.users:
+            if hash(password) not in self.users.values():
+                self.current_user = login
+
     def register(self, nickname, password, age):
-        self.nickname = nickname
-        self.password = password
         self.age = age
-
-        if age < 18:
-            self.is_adult = False
+        if nickname not in self.users:
+            self.users[nickname] = password
+            self.current_user = nickname
         else:
-            self.is_adult = True
-
-        if len(nickname) < 5 or len(password) < 8:
-            print("Nickname and password must be at least 5 and 8 characters long")
-            return
-
-        for user in self.users:
-            if user.nickname == nickname:
-                print("Nickname already exists")
-                return
-
-        if self.is_adult:
-            self.nickname = nickname
-            self.password = password
-            self.age = age
-            print("User has been registered successfully")
-
-        if not self.is_adult:
-            print("You must be 18 years old to register")
-
-        if self.is_adult:
-            print("User has been registered successfully and logged in")
-
-    def add_user(self, user):
-        self.users.append(user)
-        print(f"{user.nickname} has been added")
-
-    def log_in(self, nickname, password):
-        for user in self.users:
-            if user.nickname == nickname and user.password == password:
-                self.current_user = user
-                print(f"Welcome, {user.nickname}!")
-                return
-            else:
-                print("Invalid nickname or password")
+            print(f'Пользователь {nickname} уже существует')
 
     def log_out(self):
-        self.current_user = None
-        print("You have been logged out")
+        return self.current_user == None
 
-    def add(self, title, **video):
-        self.title = title
-        self.videos.append(video)
-        print(f"{video.title} has been added")
+    def add(self, *video):
+        list_video = [*video]
+        for i in list_video:
+            if i not in self.videos:
+                self.videos.append(i)
+        return self.videos
 
-    def get_video(self, title):
-        for video in self.videos:
-            if video.title == title:
-                return video
+    def get_videos(self, word):
+        list_video = []
+        for i in self.videos:
+            if word.lower() in i.title.lower():
+                list_video.append(i.title)
+        return list_video
+
+    def watch_video(self, word_video):
+        if self.current_user:
+            if self.age > 18:
+                for video in self.videos:
+                    if word_video in video.title:
+                        for i in range(video.duration):
+                            counter = ''
+                            video.time_now += 1
+                            counter += str(video.time_now)
+                            print(counter, end=' ')
+                            sleep(1)
+                        print('Конец видео')
+                        video.time_now -= video.duration
+
             else:
-                print("Video not found")
+                print("Вам нет 18 лет, пожалуйста покиньте страницу")
+        else:
+            print("Войдите в аккаунт, чтобы смотреть видео")
 
-    def watch_video(self):
-        if self.current_user is None:
-            print("You must be logged in to watch a video")
-            return
 
-        video = self.get_video(input("Enter the title of the video you want to watch: "))
+class Video:
+    def init(self, title, duration, adult_mode=False):
+        self.title = title
+        self.duration = duration
+        self.time_now = 0
 
-        if video is None:
-            return
 
-        if video.adult_mode and not self.current_user.is_adult:
-            print("You must be 18 years old to watch this adult video")
-            return
-
-        print(f"Watching {video.title}")
-        print(f"Current time: {video.time_now}/{video.duration}")
-        video.time_now += 1
-
-        if video.time_now >= video.duration:
-            print(f"{video.title} has ended")
-
+class User:
+    def init(self, nickname, password, age):
+        self.nickname = nickname
+        self.password = hash(password)
+        self.age = age
 
 
 ur = UrTube()
-v1 = Video('Лучший язык программирования 2024 года', 200,False)
-v2 = Video('Для чего девушкам парень программист?', 10, True)
+v1 = Video('Лучший язык программирования 2024 года', 200)
+v2 = Video('Для чего девушкам парень программист?', 10, adult_mode=True)
 
-# Добавление видео
+    # Добавление видео
 ur.add(v1, v2)
 
-# Проверка поиска
+    # Проверка поиска
 print(ur.get_videos('лучший'))
 print(ur.get_videos('ПРОГ'))
 
-# Проверка на вход пользователя и возрастное ограничение
+    # Проверка на вход пользователя и возрастное ограничение
 ur.watch_video('Для чего девушкам парень программист?')
 ur.register('vasya_pupkin', 'lolkekcheburek', 13)
 ur.watch_video('Для чего девушкам парень программист?')
 ur.register('urban_pythonist', 'iScX4vIJClb9YQavjAgF', 25)
 ur.watch_video('Для чего девушкам парень программист?')
 
-# Проверка входа в другой аккаунт
+    # Проверка входа в другой аккаунт
 ur.register('vasya_pupkin', 'F8098FM8fjm9jmi', 55)
 print(ur.current_user)
 
-# Попытка воспроизведения несуществующего видео
+    # Попытка воспроизведения несуществующего видео
 ur.watch_video('Лучший язык программирования 2024 года!')
